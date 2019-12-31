@@ -29,16 +29,24 @@ const LanguageService = {
       .where({ language_id })
   },
 
-  getHeadWord(db, language_head) {
+  getWordWithId(db, id) {
     return db
       .from('word')
-      .select(
-        'word.original',
-        'word.correct_count',
-        'word.incorrect_count',
-      )
-      .where('word.id', language_head) 
-      .first();
+      .select('*')
+      .where('word.id', id)
+      .first() 
+  },
+
+  updateWord(db, id, newFields) {
+    return db
+      .where({ id })
+      .update(newFields)
+  },
+
+  updateLanguage(db, id, newFields) {
+    return db
+      .where({ id })
+      .update(newFields)
   }
 }
 

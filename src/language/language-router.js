@@ -1,6 +1,7 @@
 const express = require('express')
 const LanguageService = require('./language-service')
 const { requireAuth } = require('../middleware/jwt-auth')
+const jsonParser = express.json()
 
 const languageRouter = express.Router()
 
@@ -32,7 +33,6 @@ languageRouter
         req.app.get('db'),
         req.language.id,
       )
-
       res.json({
         language: req.language,
         words,
@@ -46,8 +46,8 @@ languageRouter
 languageRouter
   .get('/head', async (req, res, next) => {
     try {
-      console.log(req.language);
-      const head = await LanguageService.getHeadWord(
+
+      const head = await LanguageService.getWordWithId(
         req.app.get('db'),
         req.language.head
       )
@@ -61,13 +61,81 @@ languageRouter
       next()
     } catch (error) {
       next(error)
-    } 
+    }
   })
 
 languageRouter
-  .post('/guess', async (req, res, next) => {
-    // implement me
-    res.send('implement me!')
+  .post('/guess', jsonParser, async (req, res, next) => {
+    try {
+      let db = req.app.get('db')
+      let success = false
+      const currHead = await LanguageService.getWordWithId(
+        db,
+        req.language.head
+      )
+      let guess = req.body.toLowerCase()
+      let newTotal = req.language.total_score
+      let newMemoryValue = currHead.memory_value * 2
+      if (guess === currHead.translation.toLowerCase()) {
+        success = true
+        newTotal++
+
+      } else {
+        newMemoryValue = 1
+      }
+
+      let updateLanguage = {
+        head: currHead.next,
+        total_score: newTotal,
+      }
+      await LanguageService.updateLanguage(
+        db,
+        req.language.id,
+        updateLanguage,
+      )
+
+      let counter = 0
+      let currNode = currHead
+      let prevNode = null
+      while (counter !== newMemoryValue) {
+        if (currNode.next !== null) {
+          prevNode = currNode
+          currNode = await LanguageService.getWordWithId(
+            db,
+            currNode.next,
+          )
+        } else {
+          prevNode = currNode
+          currNode = null
+          break;
+        }
+        counter++
+      }
+      let tempNext = currNode.next
+      updatePrevNode = {
+        next: currHead.id,
+      }
+      await LanguageService.updateWord(
+        db,
+        currNode.id,
+        updatePrevNode,
+      )
+      let wordCounter = success ? 'correct_count' : 'incorrect_count'
+      let wordToUpdate = {
+        [wordCounter]: currHead[wordCounter] + 1,
+        memory_value: newMemoryValue,
+        next: tempNext
+      }
+      await LanguageService.updateWord(
+        db,
+        currHead.id,
+        wordToUpdate,
+      )
+      res.json({correctAnswer: currHead.translation, success })
+    }
+    catch (error){
+      next(error)
+    }
   })
 
 module.exports = languageRouter
