@@ -51,12 +51,11 @@ languageRouter
         req.app.get('db'),
         req.language.head
       )
-      console.log(head);
       res.json({
         nextWord: head.original,
         wordCorrectCount: head.correct_count,
         wordIncorrectCount: head.incorrect_count,
-        total_score: req.language.total_score,
+        totalScore: req.language.total_score,
       })
       next()
     } catch (error) {
@@ -66,6 +65,12 @@ languageRouter
 
 languageRouter
   .post('/guess', jsonParser, async (req, res, next) => {
+    console.log(req.body)
+    if (!req.body.guess) {
+      return res.status(400).json({
+        error: `Missing 'guess' in request body`
+      })
+    }
     try {
       let db = req.app.get('db')
       let success = false
@@ -73,13 +78,14 @@ languageRouter
         db,
         req.language.head
       )
-      let guess = req.body.toLowerCase()
+
+      let guess = req.body.guess.toLowerCase()
       let newTotal = req.language.total_score
       let newMemoryValue = currHead.memory_value * 2
+
       if (guess === currHead.translation.toLowerCase()) {
         success = true
         newTotal++
-
       } else {
         newMemoryValue = 1
       }
@@ -96,7 +102,7 @@ languageRouter
 
       let counter = 0
       let currNode = currHead
-      
+
       while (counter !== newMemoryValue) {
         if (currNode.next !== null) {
           currNode = await LanguageService.getWordWithId(
@@ -122,16 +128,24 @@ languageRouter
         memory_value: newMemoryValue,
         next: tempNext
       }
-      await LanguageService.updateWord(
+      let updatedWord = await LanguageService.updateWord(
         db,
         currHead.id,
         wordToUpdate,
       )
 
-      return res.status(200).json({correctAnswer: currHead.translation, success });
-    }
+      let nextWord = await LanguageService.getWordWithId(db, currHead.next);
+      return res.json({
+        nextWord: nextWord.original,
+        wordCorrectCount: nextWord.correct_count,
+        wordIncorrectCount: nextWord.incorrect_count,
+        totalScore: newTotal,
+        answer: updatedWord.translation,
+        isCorrect: success,
+      })
 
-    catch (error){
+    }
+    catch (error) {
       next(error)
     }
   })

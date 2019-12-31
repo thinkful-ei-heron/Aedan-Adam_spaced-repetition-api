@@ -39,13 +39,17 @@ const LanguageService = {
 
   updateWord(db, id, newFields) {
     return db
+      .from('word')
       .where({ id })
       .update(newFields)
+      .returning('*')
+      .then(rows => rows[0])
   },
 
   updateLanguage(db, id, newFields) {
     return db
-      .where({ id })
+      .from('language')
+      .where( {id} )
       .update(newFields)
   }
 }
