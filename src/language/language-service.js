@@ -38,6 +38,7 @@ const LanguageService = {
         'word.incorrect_count',
       )
       .where('word.id', language_head) 
+      .first();
   }
 }
 
