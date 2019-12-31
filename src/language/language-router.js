@@ -96,21 +96,17 @@ languageRouter
 
       let counter = 0
       let currNode = currHead
-      let prevNode = null
+      
       while (counter !== newMemoryValue) {
         if (currNode.next !== null) {
-          prevNode = currNode
           currNode = await LanguageService.getWordWithId(
             db,
             currNode.next,
           )
-        } else {
-          prevNode = currNode
-          currNode = null
-          break;
-        }
-        counter++
+          counter++
+        } else break;
       }
+
       let tempNext = currNode.next
       updatePrevNode = {
         next: currHead.id,
@@ -131,8 +127,10 @@ languageRouter
         currHead.id,
         wordToUpdate,
       )
-      res.json({correctAnswer: currHead.translation, success })
+
+      return res.status(200).json({correctAnswer: currHead.translation, success });
     }
+
     catch (error){
       next(error)
     }
