@@ -64,6 +64,11 @@ languageRouter
 
 languageRouter
   .post('/guess', jsonParser, async (req, res, next) => {
+    if (!req.body.guess) {
+      return res.status(400).json({
+        error: { message: `Missing '${key}' in request body` }
+      })
+    }
     try {
       let db = req.app.get('db')
       let success = false
@@ -129,9 +134,18 @@ languageRouter
         currHead.id,
         wordToUpdate,
       )
-      res.json({correctAnswer: currHead.translation, success })
+        .then(updatedWord => {
+          res.json({
+            nextWord: updatedWord.original,
+            wordCorrectCount: updatedWord.correct_count,
+            wordIncorrectCount: updatedWord.incorrect_count,
+            totalScore: newTotal,
+            answer: updatedWord.translation,
+            isCorrect: success, 
+        })
+      })
     }
-    catch (error){
+    catch (error) {
       next(error)
     }
   })
