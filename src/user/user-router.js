@@ -41,7 +41,7 @@ userRouter
         req.app.get('db'),
         newUser
       )
-
+      console.log(user)
       await UserService.populateUserWords(
         req.app.get('db'),
         user.id

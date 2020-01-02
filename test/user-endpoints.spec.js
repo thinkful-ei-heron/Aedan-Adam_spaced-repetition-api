@@ -176,11 +176,11 @@ describe('User Endpoints', function () {
           total_score: 0,
           words: [
             { original: 'Montagne', translation: 'Mountain' },
-            { original: 'Forêt', translation: 'Forest' },
+            { original: 'Foret', translation: 'Forest' },
             { original: 'Arbre', translation: 'Tree' },
             { original: 'Fleur', translation: 'Flower' },
             { original: 'Niege', translation: 'Snow' },
-            { original: 'Saleté', translation: 'Dirt' },
+            { original: 'Salete', translation: 'Dirt' },
             { original: 'Pluie', translation: 'Rain' },
             { original: 'Vent', translation: 'Wind' },
             { original: 'Terre', translation: 'Earth' },

@@ -22,11 +22,11 @@ VALUES
 INSERT INTO "word" ("id", "language_id", "original", "translation", "next")
 VALUES
   (1, 1, 'Montagne', 'Mountain', 2),
-  (2, 1, 'Forêt', 'Forest', 3),
+  (2, 1, 'Foret', 'Forest', 3),
   (3, 1, 'Arbre', 'Tree', 4),
   (4, 1, 'Fleur', 'Flower', 5),
   (5, 1, 'Niege', 'Snow', 6),
-  (6, 1, 'Saleté', 'Dirt', 7),
+  (6, 1, 'Salete', 'Dirt', 7),
   (7, 1, 'Pluie', 'Rain', 8),
   (8, 1, 'Vent', 'Wind', 9),
   (9, 1, 'Terre', 'Earth', 10),

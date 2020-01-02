@@ -4,7 +4,7 @@ const REGEX_UPPER_LOWER_NUMBER_SPECIAL = /(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*
 
 const UserService = {
   hasUserWithUserName(db, username) {
-    return db('user')
+    return db('users')
       .where({ username })
       .first()
       .then(user => !!user)
@@ -12,7 +12,7 @@ const UserService = {
   insertUser(db, newUser) {
     return db
       .insert(newUser)
-      .into('user')
+      .into('users')
       .returning('*')
       .then(([user]) => user)
   },
@@ -59,11 +59,11 @@ const UserService = {
 
       const languageWords = [
         ['Montagne', 'Mountain', 2],
-        ['Forêt', 'Forest', 3],
+        ['Foret', 'Forest', 3],
         ['Arbre', 'Tree', 4],
         ['Fleur', 'Flower', 5],
         ['Niege', 'Snow', 6],
-        ['Saleté', 'Dirt', 7],
+        ['Salete', 'Dirt', 7],
         ['Pluie', 'Rain', 8],
         ['Vent', 'Wind', 9],
         ['Terre', 'Earth', 10],
