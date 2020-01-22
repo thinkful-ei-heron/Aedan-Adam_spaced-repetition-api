@@ -65,6 +65,7 @@ languageRouter
 
 languageRouter
   .post('/guess', jsonParser, async (req, res, next) => {
+    // validate req exists
     if (!req.body.guess) {
       return res.status(400).json({
         error: `Missing 'guess' in request body`
@@ -73,6 +74,7 @@ languageRouter
     try {
       let db = req.app.get('db')
       let success = false
+      //get current head of language list by id and set to currHead
       const currHead = await LanguageService.getWordWithId(
         db,
         req.language.head
@@ -81,14 +83,14 @@ languageRouter
       let guess = req.body.guess.toLowerCase()
       let newTotal = req.language.total_score
       let newMemoryValue = currHead.memory_value * 2
-
+      //compare request guess to current head, if correct increase total, else set memory value to 1
       if (guess === currHead.translation.toLowerCase()) {
         success = true
         newTotal++
       } else {
         newMemoryValue = 1
       }
-
+      //update language to set the new total(different only if correct) and set the new head to the next node
       let updateLanguage = {
         head: currHead.next,
         total_score: newTotal,
@@ -101,7 +103,7 @@ languageRouter
 
       let counter = 0
       let currNode = currHead
-
+      //use counter and while loop to find the last word in the list with memory value less than the current words memory value
       while (counter !== newMemoryValue) {
         if (currNode.next !== null) {
           currNode = await LanguageService.getWordWithId(
@@ -111,17 +113,19 @@ languageRouter
           counter++
         } else break;
       }
-
+      //set tempNext to currNode.next to use when updating the current head
       let tempNext = currNode.next
       updatePrevNode = {
         next: currHead.id,
       }
+      //update the word found in the while loop at 107 to have its next pointing to the current head, this moves the current head to that position in the list
       await LanguageService.updateWord(
         db,
         currNode.id,
         updatePrevNode,
       )
       let wordCounter = success ? 'correct_count' : 'incorrect_count'
+      //update the current head to it's new memory value and set it's next pointer to tempNext, completing the move of the current head
       let wordToUpdate = {
         [wordCounter]: currHead[wordCounter] + 1,
         memory_value: newMemoryValue,
@@ -132,7 +136,7 @@ languageRouter
         currHead.id,
         wordToUpdate,
       )
-
+      //grab the next word in the list and send to client to begin the guessing process over again
       let nextWord = await LanguageService.getWordWithId(db, currHead.next);
       return res.json({
         nextWord: nextWord.original,
